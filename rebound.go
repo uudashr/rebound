@@ -6,8 +6,8 @@ import (
 	"reflect"
 )
 
-// EventHandle is a function type that handle the event.
-// The function should return an error if the handling is failed.
+// EventHandler is a function type that handles an event.
+// The function should return an error if handling fails.
 // The function form is:
 //
 //		func(event Event) error
@@ -27,15 +27,18 @@ type NoHandlerError struct {
 	EventName string
 }
 
+// Error returns the error message for NoHandlerError.
 func (e NoHandlerError) Error() string {
 	return fmt.Sprintf("rebound: no handler for event %q", e.EventName)
 }
 
+// Rebound manages event handlers and dispatching events.
 type Rebound struct {
 	handlers map[string]EventHandler
 	Decoder  Decoder
 }
 
+// ReactTo registers an event handler for a given event name.
 func (r *Rebound) ReactTo(eventName string, fn EventHandler) {
 	if eventName == "" {
 		panic("rebound: event name is empty")
@@ -58,6 +61,7 @@ func (r *Rebound) ReactTo(eventName string, fn EventHandler) {
 	r.handlers[eventName] = fn
 }
 
+// Dispatch handles an event by its name and associated data.
 func (r *Rebound) Dispatch(eventName string, data []byte) error {
 	if eventName == "" {
 		return fmt.Errorf("rebound: event name is empty")
@@ -93,6 +97,7 @@ func (r *Rebound) decode(data []byte, v interface{}) error {
 	return decoder.Decode(data, v)
 }
 
+// ValidateHandler checks if the provided function is a valid EventHandler.
 func ValidateHandler(fn EventHandler) error {
 	fnType := reflect.TypeOf(fn)
 	if fnType.Kind() != reflect.Func {
@@ -118,15 +123,22 @@ func ValidateHandler(fn EventHandler) error {
 	return nil
 }
 
+// Decoder defines an interface for decoding event data.
 type Decoder interface {
+	// Decode decodes data into the provided interface.
 	Decode(data []byte, v interface{}) error
 }
 
+// DecodeFunc is a function type that implements the Decoder interface.
 type DecodeFunc func(data []byte, v interface{}) error
 
+// Decode implement the Decoder interface.
 func (f DecodeFunc) Decode(data []byte, v interface{}) error {
 	return f(data, v)
 }
 
+// JsonDecoder is a Decoder implementation using JSON.
 var JsonDecoder = DecodeFunc(json.Unmarshal)
+
+// DefaultDecoder is the default decoder used if none is specified.
 var DefaultDecoder = JsonDecoder
