@@ -39,7 +39,7 @@ func main() {
 		return nil
 	})
 
-    // Dispatch the "order.completed" event
+	// Dispatch the "order.completed" event
 	rb.Dispatch("order.completed", []byte(`{"OrderID":"123"}`))
 }
 ```
