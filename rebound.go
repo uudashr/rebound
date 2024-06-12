@@ -22,6 +22,15 @@ import (
 //	})
 type EventHandler any
 
+// NoHandlerError indicates that no handler was found for the given event.
+type NoHandlerError struct {
+	EventName string
+}
+
+func (e NoHandlerError) Error() string {
+	return fmt.Sprintf("rebound: no handler for event %q", e.EventName)
+}
+
 type Rebound struct {
 	handlers map[string]EventHandler
 	Decoder  Decoder
@@ -56,7 +65,7 @@ func (r *Rebound) Dispatch(eventName string, data []byte) error {
 
 	fn := r.handlers[eventName]
 	if fn == nil {
-		return fmt.Errorf("rebound: no handler for event %q", eventName)
+		return NoHandlerError{EventName: eventName}
 	}
 
 	fnType := reflect.TypeOf(fn)
