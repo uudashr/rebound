@@ -1,3 +1,5 @@
+// Package rebound provides a lightweight event handling system.
+// It allows registering event handlers and dispatching events by name.
 package rebound
 
 import (
@@ -98,6 +100,7 @@ func (r *Rebound) decode(data []byte, v interface{}) error {
 }
 
 // ValidateHandler checks if the provided function is a valid EventHandler.
+// Returns an error if the function does not have the expected signature.
 func ValidateHandler(fn EventHandler) error {
 	fnType := reflect.TypeOf(fn)
 	if fnType.Kind() != reflect.Func {
