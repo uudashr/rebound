@@ -76,12 +76,14 @@ func (r *Rebound) Dispatch(eventName string, data []byte) error {
 
 	fnType := reflect.TypeOf(fn)
 	event := reflect.New(fnType.In(0))
+
 	err := r.decode(data, event.Interface())
 	if err != nil {
 		return fmt.Errorf("rebound: failed to unmarshal event data: %w", err)
 	}
 
 	fnValue := reflect.ValueOf(fn)
+
 	retVals := fnValue.Call([]reflect.Value{event.Elem()})
 	if !retVals[0].IsNil() {
 		return retVals[0].Interface().(error)
@@ -140,8 +142,8 @@ func (f DecodeFunc) Decode(data []byte, v interface{}) error {
 	return f(data, v)
 }
 
-// JsonDecoder is a Decoder implementation using JSON.
-var JsonDecoder = DecodeFunc(json.Unmarshal)
+// JSONDecoder is a Decoder implementation using JSON.
+var JSONDecoder = DecodeFunc(json.Unmarshal)
 
 // DefaultDecoder is the default decoder used if none is specified.
-var DefaultDecoder = JsonDecoder
+var DefaultDecoder = JSONDecoder
